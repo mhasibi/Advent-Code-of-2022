@@ -12,6 +12,7 @@ class Player
 
     public function getId(): int
     {
+        echo "Get Player ID " . "<br>" ;
         return $this->id;
     }
 
@@ -118,14 +119,30 @@ $round->addPlayers($self);
 
 $handle = fopen('input.txt', "rb");
 
-$opponentChoices = ['A' => $opponent->playRock(), 'B' => $opponent->playPaper(), 'C' => $opponent->playScissors()];
-$selfChoices = ['X' => $self->playRock(), 'Y' => $self->playPaper(), 'Z' => $self->playScissors()];
 
 if ($handle) {
     while (($outcome = fgets($handle)) !== false) {
         echo "Outcome: " . $outcome . "<br>";
-        $opponentMove = $opponentChoices[$outcome[0]];
-        $selfMove = $selfChoices[$outcome[2]];
+        $opponentMove = $outcome[0];
+        $selfMove = $outcome[2];
+
+        switch ($opponentMove) {
+            case 'A':
+                return $opponent->playRock();
+            case 'B':
+                return $opponent->playPaper();
+            case 'C':
+                return $opponent->playScissors();
+        }
+
+        switch ($selfMove) {
+            case 'X':
+                return $self->playRock();
+            case 'Y':
+                return $self->playPaper();
+            case 'Z':
+                return $self->playScissors();
+        }
 
         echo $opponent->score . " vs. " . $self->score . "<br>";
 
