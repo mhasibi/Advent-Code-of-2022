@@ -1,5 +1,5 @@
 <?php
-$filename = 'day-1.txt';
+$filename = 'input.txt';
 $numbers = file($filename);
 
 $max_calories = 0;
