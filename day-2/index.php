@@ -2,11 +2,11 @@
 
 class Player
 {
-    public int $id = 0;
     public int $score = 0;
 
     public function __construct(int $id)
     {
+        echo "Player is being created with ID " . $id . "<br>";
         $this->id = $id;
     }
 
@@ -97,8 +97,7 @@ class Round
         return $this;
     }
 
-    public function resetIndividualScores(): void
-    {
+    public function resetIndividualScores(): void {
         foreach ($this->players as $player) {
             $player->resetScore();
         }
@@ -112,7 +111,8 @@ class Round
 }
 
 $round = new Round();
-$opponent = $self = $round::CreatePlayer();
+$opponent = $round::CreatePlayer();
+$self = $round::CreatePlayer();
 $round->addPlayers($opponent);
 $round->addPlayers($self);
 
@@ -126,6 +126,8 @@ if ($handle) {
         echo "Outcome: " . $outcome . "<br>";
         $opponentMove = $opponentChoices[$outcome[0]];
         $selfMove = $selfChoices[$outcome[2]];
+
+        echo $opponent->score . " vs. " . $self->score . "<br>";
 
         if ($opponent->getScore() > $self->getScore()) {
             $round->roundLost();
