@@ -6,13 +6,11 @@ class Player
 
     public function __construct(int $id)
     {
-        echo "Player is being created with ID " . $id . "<br>";
         $this->id = $id;
     }
 
     public function getId(): int
     {
-        echo "Get Player ID " . "<br>" ;
         return $this->id;
     }
 
@@ -23,21 +21,18 @@ class Player
 
     public function playRock(): self
     {
-        echo "Play Rock" . "<br>";
         $this->score += 1;
         return $this;
     }
 
     public function playPaper(): self
     {
-        echo "Play Paper" . "<br>";
         $this->score += 2;
         return $this;
     }
 
     public function playScissors(): self
     {
-        echo "Play Scissors" . "<br>";
         $this->score += 3;
         return $this;
     }
@@ -56,6 +51,12 @@ class Round
     public int $totalOpponentScore = 0;
     public int $totalSelfScore = 0;
 
+    public array $combinations = [
+        'winning' => ['AY', 'BZ', 'CX'],
+        'draw' => ['AX', 'BY', 'CZ'],
+        'losing' => ['AZ', 'BX', 'CY']
+    ];
+
     public static function CreatePlayer(): Player
     {
         $player = new Player(self::$LastID);
@@ -69,10 +70,22 @@ class Round
         return $this;
     }
 
+    public function decideRound($roundCombination)
+    {
+        if (in_array($roundCombination, $this->combinations['winning'])) {
+            $this->roundWon();
+        }
+        if (in_array($roundCombination, $this->combinations['draw'])) {
+            $this->roundDraw();
+        }
+        if (in_array($roundCombination, $this->combinations['losing'])) {
+            $this->roundLost();
+        }
+    }
+
     public function roundLost(): self
     {
-        echo "Round Lost " . "<br>";
-        $this->players[0]->score += 3;
+        $this->players[0]->score += 6;
         $this->calculateTotalScores();
         $this->resetIndividualScores();
         return $this;
@@ -80,7 +93,6 @@ class Round
 
     public function roundDraw(): self
     {
-        echo "Round Draw " . "<br>";
         foreach ($this->players as $player) {
             $player->score += 3;
         }
@@ -91,14 +103,14 @@ class Round
 
     public function roundWon(): self
     {
-        echo "Round Won " . "<br>";
         $this->players[1]->score += 6;
         $this->calculateTotalScores();
         $this->resetIndividualScores();
         return $this;
     }
 
-    public function resetIndividualScores(): void {
+    public function resetIndividualScores(): void
+    {
         foreach ($this->players as $player) {
             $player->resetScore();
         }
@@ -112,52 +124,46 @@ class Round
 }
 
 $round = new Round();
+
 $opponent = $round::CreatePlayer();
 $self = $round::CreatePlayer();
+
 $round->addPlayers($opponent);
 $round->addPlayers($self);
 
 $handle = fopen('input.txt', "rb");
 
-
 if ($handle) {
     while (($outcome = fgets($handle)) !== false) {
-        echo "Outcome: " . $outcome . "<br>";
         $opponentMove = $outcome[0];
         $selfMove = $outcome[2];
 
-        switch ($opponentMove) {
+        switch (trim($opponentMove)) {
             case 'A':
-                return $opponent->playRock();
+                $opponent->playRock();
+                break;
             case 'B':
-                return $opponent->playPaper();
+                $opponent->playPaper();
+                break;
             case 'C':
-                return $opponent->playScissors();
+                $opponent->playScissors();
+                break;
         }
 
         switch ($selfMove) {
             case 'X':
-                return $self->playRock();
+                $self->playRock();
+                break;
             case 'Y':
-                return $self->playPaper();
+                $self->playPaper();
+                break;
             case 'Z':
-                return $self->playScissors();
+                $self->playScissors();
+                break;
         }
 
-        echo $opponent->score . " vs. " . $self->score . "<br>";
-
-        if ($opponent->getScore() > $self->getScore()) {
-            $round->roundLost();
-        }
-
-        if ($opponent->getScore() == $self->getScore()) {
-            $round->roundDraw();
-        }
-
-        if ($opponent->getScore() < $self->getScore()) {
-            $round->roundWon();
-        }
+        $round->decideRound($opponentMove . $selfMove);
     }
-    echo "total self score: " . $round->totalSelfScore;
+    echo "Total self score: " . $round->totalSelfScore;
 }
 
