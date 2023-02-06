@@ -31,15 +31,15 @@ class Rucksack{
     public function createCompartments(string $itemList): array {
         $itemListLength = strlen($itemList);
         if ($itemListLength) {
-            $this->compartments[] = substr($itemList, 0, $itemListLength/2);
-            $this->compartments[] = substr($itemList, $itemListLength/2, $itemListLength-1);
+            $this->compartments[] = str_split(substr($itemList, 0, $itemListLength/2));
+            $this->compartments[] = str_split(substr($itemList, $itemListLength/2, $itemListLength-1));
         }
         return $this->compartments;
     }
 
     public function findCommonItem() {
-        foreach ($text_split=str_split($this->compartments[0]) as $char) {
-            if (strpos($this->compartments[1], $char)) {
+        foreach ($this->compartments[0] as $char) {
+            if (in_array($char, $this->compartments[1])) {
                 return $char;
             }
         }
@@ -57,5 +57,7 @@ if ($handle) {
         $p = $rucksack->findItemPriority($rucksack->findCommonItem());
         $priorities += $p;
     }
-    echo  "Priorities = " . $priorities . "<br>";
+
 }
+
+echo  "Priorities = " . $priorities . "<br>";
