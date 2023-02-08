@@ -50,9 +50,9 @@ class Rucksack{
 
     public function findGroupBadge(array $itemList) {
         $charOut = '';
-        for ($i = 0 ; $i < strlen($itemList[0]) ; $i++) {
+        for ($i = 0 ; $i < count($itemList[0]) ; $i++) {
             $char = $itemList[0][$i];
-            if (in_array($char, str_split($itemList[1])) && in_array($char, str_split($itemList[2]))) {
+            if (in_array($char, $itemList[1]) && in_array($char, $itemList[2])) {
                     $charOut= $char;
             }
         }
@@ -68,7 +68,6 @@ $groupPriorities = 0;
 
 if ($handle) {
     $lines = [];
-    $groupCounter = 0;
     $groupItems = [];
     while (($line = fgets($handle)) !== false) {
         $rucksack = new Rucksack();
@@ -77,13 +76,11 @@ if ($handle) {
         $p = $commonItem->getItemPriority();
         $priorities += $p;
 
-        $groupItems[] = trim($line);
-
+        $groupItems[] = str_split(trim($line));
         if (count($groupItems) == 3) {
             $groupBadgeItem = $rucksack->findGroupBadge($groupItems);
             $groupBadge = new Item($groupBadgeItem);
             $groupPriorities += $groupBadge->getItemPriority();
-            $groupCounter = 0;
             $groupItems = [];
         }
     }
