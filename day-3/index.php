@@ -48,16 +48,17 @@ class Rucksack{
         return '';
     }
 
-    public function findGroupBadge(string $items) {
-        $itemsList = explode(',', $items);
-        for ($i = 0 ; $i < strlen($itemsList[0]) ; $i++) {
-            $char = $itemsList[0][$i];
-            if (in_array($char, str_split($itemsList[1])) && in_array($char, str_split($itemsList[2]))) {
-                return $char;
+    public function findGroupBadge(array $itemList) {
+        $charOut = '';
+        for ($i = 0 ; $i < strlen($itemList[0]) ; $i++) {
+            $char = $itemList[0][$i];
+            if (in_array($char, str_split($itemList[1])) && in_array($char, str_split($itemList[2]))) {
+                    $charOut= $char;
             }
         }
-        return '';
+        return $charOut;
     }
+
 
 }
 
@@ -68,7 +69,7 @@ $groupPriorities = 0;
 if ($handle) {
     $lines = [];
     $groupCounter = 0;
-    $groupItems = '';
+    $groupItems = [];
     while (($line = fgets($handle)) !== false) {
         $rucksack = new Rucksack();
         $rucksack->createDoubleCompartments(trim($line));
@@ -76,18 +77,14 @@ if ($handle) {
         $p = $commonItem->getItemPriority();
         $priorities += $p;
 
-        if ($groupCounter < 3) {
-            if ($groupCounter > 0) {
-                $groupItems .= ',';
-            }
-            $groupItems .= trim($line);
-            $groupCounter += 1;
-        } else {
+        $groupItems[] = trim($line);
+
+        if (count($groupItems) == 3) {
             $groupBadgeItem = $rucksack->findGroupBadge($groupItems);
             $groupBadge = new Item($groupBadgeItem);
             $groupPriorities += $groupBadge->getItemPriority();
             $groupCounter = 0;
-            $groupItems = '';
+            $groupItems = [];
         }
     }
 
