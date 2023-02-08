@@ -1,63 +1,97 @@
 <?php
 
 class Item {
+    public array $itemTypes = [];
+    public array $itemObject = [
+        'name'=> '',
+        'priority' => ''
+    ];
 
-    public int $id = 0;
-    public int $priority = 0;
-
-    public function __construct()
+    public function __construct(string $char)
     {
-        $this->id = 0;
+        $this->itemObject['name'] = $char;
+        $this->itemTypes = array_merge(range('a','z'), range('A','Z'));
+        $this->findItemPriority($char);
     }
 
-    public function setPriority(int $priority) {
-        $this->priority = $priority;
+    public function findItemPriority (string $char): self {
+        $this->itemObject['priority'] = array_search($char, $this->itemTypes) + 1;
+        return $this;
+    }
+
+    public function getItemPriority() {
+        return $this->itemObject['priority'];
     }
 }
 
+
 class Rucksack{
     public array $compartments = [];
-    public array $itemTypes = [];
 
-    public function __construct()
-    {
-        $this->itemTypes = array_merge(range('a','z'), range('A','Z'));
-    }
-
-    public function findItemPriority (string $item): int {
-        return array_search($item, $this->itemTypes) + 1;
-    }
-
-    public function createCompartments(string $itemList): array {
+    public function createDoubleCompartments(string $itemList): self {
         $itemListLength = strlen($itemList);
         if ($itemListLength) {
             $this->compartments[] = str_split(substr($itemList, 0, $itemListLength/2));
             $this->compartments[] = str_split(substr($itemList, $itemListLength/2, $itemListLength-1));
         }
-        return $this->compartments;
+        return $this;
     }
 
-    public function findCommonItem() {
-        foreach ($this->compartments[0] as $char) {
-            if (in_array($char, $this->compartments[1])) {
+    public function findCommonItem(array $compartments) {
+        foreach ($compartments[0] as $char) {
+            foreach (array_slice($compartments, 1, count($compartments)-1) as $compartment) {
+                if (in_array($char, $compartment)) {
+                    return $char;
+                }
+            }
+        }
+        return '';
+    }
+
+    public function findGroupBadge(string $items) {
+        $itemsList = explode(',', $items);
+        for ($i = 0 ; $i < strlen($itemsList[0]) ; $i++) {
+            $char = $itemsList[0][$i];
+            if (in_array($char, str_split($itemsList[1])) && in_array($char, str_split($itemsList[2]))) {
                 return $char;
             }
         }
         return '';
     }
+
 }
 
 $handle = fopen('input.txt', "rb");
 $priorities = 0;
+$groupPriorities = 0;
 
 if ($handle) {
+    $lines = [];
+    $groupCounter = 0;
+    $groupItems = '';
     while (($line = fgets($handle)) !== false) {
         $rucksack = new Rucksack();
-        $rucksack->createCompartments(trim($line));
-        $p = $rucksack->findItemPriority($rucksack->findCommonItem());
+        $rucksack->createDoubleCompartments(trim($line));
+        $commonItem = new Item($rucksack->findCommonItem($rucksack->compartments));
+        $p = $commonItem->getItemPriority();
         $priorities += $p;
+
+        if ($groupCounter < 3) {
+            if ($groupCounter > 0) {
+                $groupItems .= ',';
+            }
+            $groupItems .= trim($line);
+            $groupCounter += 1;
+        } else {
+            $groupBadgeItem = $rucksack->findGroupBadge($groupItems);
+            $groupBadge = new Item($groupBadgeItem);
+            $groupPriorities += $groupBadge->getItemPriority();
+            $groupCounter = 0;
+            $groupItems = '';
+        }
     }
 
 }
 
 echo  "Priorities = " . $priorities . "<br>";
+echo  "Group Priorities = " . $groupPriorities . "<br>";
